@@ -4,24 +4,15 @@ using UnityEngine;
 
 public class CretureController : MonoBehaviour
 {
-    private bool first = false;
-    private void Awake()
+    // Start is called before the first frame update
+    void Start()
     {
-        Init();
+        
     }
-    public virtual bool Init()
-    {
-        if(!first)
-        {
-            first = true;
-            //초기화 부분 작성
-            return true;
-        }
 
-        return false;
-    }
-    public virtual void OnDead()
+    // Update is called once per frame
+    void Update()
     {
-
+        
     }
 }
