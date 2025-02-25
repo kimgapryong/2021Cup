@@ -41,11 +41,9 @@ public class GridController : MonoBehaviour
     public GameObject player;
 
     public Dictionary<Vector3Int, Cell> cellDic = new Dictionary<Vector3Int, Cell>(); 
-    private void Start()
+    public void Init()
     {
         MakeTile();
-        GameObject pla = Instantiate(player);
-        pla.transform.Find("Player").transform.position = new Vector2(2,2);
         grid = gameObject.GetComponent<Grid>();
 
     }
@@ -58,6 +56,7 @@ public class GridController : MonoBehaviour
                 Cell cell = GetCell(new Vector3Int(x, y));
                 cell.obj = new GameObject("SpriteTile");
                 cell.obj.AddComponent<SpriteRenderer>().sprite = e_Sprite;
+                cell.obj.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1f, 0.5f);
                 cell.obj.transform.parent = tileRoot;
                 cell.TiieType = Define.TileTiles.E_Tile;
                 cell.x = x;
@@ -75,6 +74,7 @@ public class GridController : MonoBehaviour
                 {
                     Cell cell = cellDic[new Vector3Int(x, y)];
                     cell.obj.GetComponent<SpriteRenderer>().sprite = p_Sprite;
+                    cell.obj.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1f);
                     cell.TiieType = Define.TileTiles.P_Tile;
                 }
             }
@@ -99,6 +99,7 @@ public class GridController : MonoBehaviour
                         {
                             Cell cell = cellDic[new Vector3Int(x, y)];
                             cell.obj.GetComponent<SpriteRenderer>().sprite = w_Sprite;
+                            cell.obj.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
                             cell.TiieType = Define.TileTiles.Wall;
                         }
                     }
@@ -108,6 +109,7 @@ public class GridController : MonoBehaviour
                         {
                             Cell cell = cellDic[new Vector3Int(x, y)];
                             cell.obj.GetComponent<SpriteRenderer>().sprite = w_Sprite;
+                            cell.obj.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
                             cell.TiieType = Define.TileTiles.Wall;
 
                             Cell next;
@@ -118,6 +120,7 @@ public class GridController : MonoBehaviour
                                     next = cellDic[new Vector3Int(cell.x, cell.y) + dir];
 
                                     next.obj.GetComponent<SpriteRenderer>().sprite = w_Sprite;
+                                    cell.obj.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
                                     next.TiieType = Define.TileTiles.Wall;
 
                                     cell = next;

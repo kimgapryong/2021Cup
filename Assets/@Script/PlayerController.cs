@@ -2,34 +2,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : CretureController
 {
-    [SerializeField]
-    private GridController grid;
-
-    public float speed = 10;
-    private Cell current;
-    private Cell next;
-
-    private Vector3Int dir;
-    private bool isMoving = false;
-
-    bool[,] closed;
-    public List<Vector3Int> cells = new List<Vector3Int>();
     private HashSet<Vector3Int> visited = new HashSet<Vector3Int>();
 
-    private void Start()
+    protected override void Start()
     {
+        base.Start();
 
-        grid = GameObject.Find("@Grid").GetComponent<GridController>();
-        closed = new bool[grid.xTile, grid.yTile];
-        Vector3Int currentPos = grid.grid.WorldToCell(transform.position);
-        current = grid.cellDic[currentPos];
+        tileTiles = Define.TileTiles.P_Tile;
 
+        speed = 10;
+        Sprite = grid.p_Sprite;
         Debug.Log(current.x +"/" +current.y);
      
     }
-    private void Update()
+    protected override void Update()
     {
         if(Input.GetKeyDown(KeyCode.W))
             dir = Vector3Int.up;
@@ -40,65 +28,25 @@ public class PlayerController : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.D))
             dir = Vector3Int.right;
 
-        MovePlayer();
+        base.Update();
     }
 
-    private void MovePlayer()
-    {
-        if(!isMoving)
-        {
-            Vector3Int nextPos = new Vector3Int(current.x, current.y) + dir;
-            next = grid.cellDic[nextPos];
+  
 
-            if (next.TiieType == Define.TileTiles.Wall)
-                return;
-            if (closed[next.x , next.y])
-                return; // Á×À½
-
-
-            if(!(next.TiieType == Define.TileTiles.P_Tile))
-            {
-                cells.Add(new Vector3Int(next.x, next.y));
-                closed[next.x, next.y] = true;
-            }
-            isMoving = true;
-        }
-        else
-        {
-            transform.position = Vector3.MoveTowards(transform.position, new Vector3Int(next.x, next.y), speed * Time.deltaTime);
-          
-            if (Vector3.Distance(transform.position, new Vector3Int(next.x, next.y)) < 0.001f) 
-            {
-                if (next.TiieType == Define.TileTiles.P_Tile && cells.Count > 0)
-                    ColorGird();
-
-                current = next;
-                if(!(current.TiieType == Define.TileTiles.P_Tile))
-                {
-                    current.TiieType = Define.TileTiles.P_Tile;
-                    current.obj.GetComponent<SpriteRenderer>().sprite = grid.p_Sprite;
-                    current.obj.GetComponent<SpriteRenderer>().color = new Color(1,1,1,0.5f);
-                }
-                
-
-
-                isMoving = false;
-            }
-        }
-    }
-
-    private void ColorGird()
+    public override void ColorGird()
     {
 
        Vector3Int nextVec = GetCenterVec();
-        
-        Debug.Log(nextVec.x + ", " + nextVec.y);
 
+     
+        Debug.Log(nextVec.x + ", " + nextVec.y);
+        Debug.Log("--------------------------------");
      
         if(nextVec != Vector3Int.zero && cells.Count > 2)
             FoolBfs(nextVec);
 
-        foreach(Vector3Int vec in cells)
+
+        foreach (Vector3Int vec in cells)
         {
             if (grid.cellDic.ContainsKey(vec))
                 grid.cellDic[vec].obj.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
@@ -118,14 +66,16 @@ public class PlayerController : MonoBehaviour
 
         cell.TiieType = Define.TileTiles.P_Tile;
         cell.obj.GetComponent<SpriteRenderer>().sprite = grid.p_Sprite;
-
-        Vector3Int[] dirs = new Vector3Int[4]
+        cell.obj.GetComponent<SpriteRenderer>().color = new Color(1,1,1,1);
+        Vector3Int[] dirs = new Vector3Int[8]
         {
         new Vector3Int(1, 0), new Vector3Int(-1, 0),
-        new Vector3Int(0, 1), new Vector3Int(0, -1)
+        new Vector3Int(0, 1), new Vector3Int(0, -1),
+        new Vector3Int(1,1), new Vector3Int(-1,1),
+        new Vector3Int(1,-1), new Vector3Int(-1,-1)
         };
 
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < dirs.Length - 1; i++)
         {
             Vector3Int nextPos = vec + dirs[i];
 
@@ -169,21 +119,66 @@ public class PlayerController : MonoBehaviour
 
     private Vector3Int Search(Vector3Int minVec, Vector3Int maxVec)
     {
+        int count = 0;
+        Vector3Int current = new Vector3Int(maxVec.x - 1, maxVec.y - 1);
+
+        if(grid.cellDic.ContainsKey(current))
+        {
+            if(grid.cellDic[current].TiieType == Define.TileTiles.E_Tile)
+            {
+                if (closed[current.x + Vector3Int.up.x, current.y + Vector3Int.up.y] &&
+                    closed[current.x + Vector3Int.right.x, current.y + Vector3Int.right.y]) 
+                    return current;
+                
+            }
+            else
+            {
+                current = new Vector3Int(minVec.x + 1, maxVec.y - 1);
+                if (closed[current.x + Vector3Int.up.x, current.y + Vector3Int.up.y] &&
+                    closed[current.x + Vector3Int.left.x, current.y + Vector3Int.left.y] &&
+                    grid.cellDic[current].TiieType == Define.TileTiles.E_Tile)
+                    return current;
+
+                current = new Vector3Int(minVec.x + 1, minVec.y + 1);
+                if (closed[current.x + Vector3Int.down.x, current.y + Vector3Int.down.y] &&
+                    closed[current.x + Vector3Int.left.x, current.y + Vector3Int.left.y] &&
+                    grid.cellDic[current].TiieType == Define.TileTiles.E_Tile)
+                    return current;
+
+                current = new Vector3Int(maxVec.x - 1, minVec.y + 1);
+                if (closed[current.x + Vector3Int.up.x, current.y + Vector3Int.up.y] &&
+                    closed[current.x + Vector3Int.right.x, current.y + Vector3Int.right.y] &&
+                    grid.cellDic[current].TiieType == Define.TileTiles.E_Tile)
+                    return current;
+            }
+
+        }
+
         for(int x = maxVec.x; x >= minVec.x; x--)
         {
-            for(int y = maxVec.y; y >= minVec.y; y--)
+            for(int y = maxVec.y ; y >= minVec.y; y--)
             {
                 if(grid.cellDic.ContainsKey(new Vector3Int(x, y)))
                 {
-                    if(grid.cellDic[new Vector3Int(x, y)].TiieType == Define.TileTiles.E_Tile)
+                    if(grid.cellDic[new Vector3Int(x, y)].TiieType == Define.TileTiles.P_Tile)
                     {
-                        Debug.Log(x + "," + y);
-                        return new Vector3Int(x, y);
+                       count++;
+                        if(count >= 2)
+                        {
+                            if (grid.cellDic[new Vector3Int(x,y + 1)].TiieType == Define.TileTiles.E_Tile)
+                                return new Vector3Int(x,y +1);
+                          
+                        }
+                        
                     }
                         
                 }
             }
+            count = 0;
         }
+
+        if (grid.cellDic[new Vector3Int(minVec.x + 1, minVec.y + 1)].TiieType == Define.TileTiles.E_Tile)
+            return new Vector3Int(minVec.x + 1, minVec.y + 1);
 
         return Vector3Int.zero;
     }

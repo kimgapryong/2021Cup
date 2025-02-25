@@ -8,6 +8,7 @@ public class Define
     {
         P_Tile,
         E_Tile,
+        Ee_Tile,
         Wall,
     }
 }
