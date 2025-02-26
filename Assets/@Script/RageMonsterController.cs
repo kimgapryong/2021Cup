@@ -32,25 +32,21 @@ public class RageMonsterController : MonsterController
             if (next.TiieType == Define.TileTiles.Wall)
                 return;
 
-            if (closed[next.x, next.y])
-                return; // Á×À½
 
-
-            if (!(next.TiieType == tileTiles) && tileTiles == Define.TileTiles.P_Tile)
+            if (playerController.closed[next.x, next.y])
             {
-                cells.Add(new Vector3Int(next.x, next.y));
-                closed[next.x, next.y] = true;
+                playerController.PlayerReTrans();
+                return;
             }
+
             isMoving = true;
         }
-        else if (isMoving)
+        else if (isMoving && !isTel)
         {
             transform.position = Vector3.MoveTowards(transform.position, new Vector3Int(next.x, next.y), speed * Time.deltaTime);
 
             if (Vector3.Distance(transform.position, new Vector3Int(next.x, next.y)) < 0.001f)
             {
-                if (next.TiieType == tileTiles && cells.Count > 0)
-                    ColorGird();
 
                 current = next;
                 if (!(current.TiieType == tileTiles))

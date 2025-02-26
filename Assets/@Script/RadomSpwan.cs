@@ -6,6 +6,7 @@ public class RadomSpwan : MonoBehaviour
 {
     public GridController gridController;
     public GameObject monParticel;
+    public GameObject boss;
 
     public GameObject player;
     public GameObject[] monster;
@@ -29,19 +30,49 @@ public class RadomSpwan : MonoBehaviour
         while (currentCount <= monMaxCount)
         {
             yield return new WaitForSeconds(spwanTime);
-            Vector3 pos = new Vector3(Random.Range(4, 48), Random.Range(4, 48));
+
+            Vector3Int pos = GetVec();
+
+            GameObject bossmon = Instantiate(boss);
+            bossmon.transform.position = pos;
+
             GameObject pa = Instantiate(monParticel);
             pa.transform.position = pos;
+
             ParticleSystem ps = pa.GetComponent<ParticleSystem>();
             float time = ps.main.duration;
             yield return new WaitForSeconds(time);
             Destroy(pa);
+            Destroy(bossmon);
 
-            int randMon = Random.Range(0, monster.Length);
+            int randMon = Random.Range(1, 101);
+            int rand;
+
+            if (randMon <= 50)
+                rand = 0;
+            else if(randMon <= 80)
+                rand = 2;
+            else
+                rand = 1;
+
             currentCount++;
-            GameObject sM = Instantiate(monster[randMon]);
+            GameObject sM = Instantiate(monster[rand]);
             sM.transform.position = pos;
         }
     }
 
+    private Vector3Int GetVec()
+    {
+        Vector3Int pos = new Vector3Int(Random.Range(4, 48), Random.Range(4, 48));
+        
+        if(gridController.cellDic.TryGetValue(pos, out Cell cell))
+        {
+            if (cell.TiieType == Define.TileTiles.Wall)
+                return GetVec();
+            else
+                return pos;
+        }
+
+        return new Vector3Int(5,5);
+    }
 }

@@ -6,6 +6,7 @@ public class CretureController : MonoBehaviour
 {
     public Define.TileTiles tileTiles { get; set; }
     public GridController grid;
+    public PlayerController playerController;
     public bool isMoving = false;
     public Cell current;
     public Cell next;
@@ -16,14 +17,19 @@ public class CretureController : MonoBehaviour
 
     public Vector3Int dir = Vector3Int.zero;
     public List<Vector3Int> cells = new List<Vector3Int>();
-
+    public Vector3Int curDir;
     public Sprite Sprite { get; set; }
     protected virtual void Start()
     {
         grid = GameObject.Find("@Grid").GetComponent<GridController>();
+        playerController = GameObject.Find("Player").GetComponent<PlayerController>();
+
         closed = new bool[grid.xTile, grid.yTile];
         Vector3Int currentPos = grid.grid.WorldToCell(transform.position);
         current = grid.cellDic[currentPos];
+
+        if (tileTiles == Define.TileTiles.E_Tile)
+            current.monster = gameObject;
 
     }
 
@@ -35,7 +41,7 @@ public class CretureController : MonoBehaviour
 
     private void MovePlayer()
     {
-        if (!isMoving && dir != Vector3Int.zero)
+        if (!isMoving && dir != Vector3Int.zero )
         {
             Vector3Int nextPos = new Vector3Int(current.x, current.y) + dir;
             next = grid.cellDic[nextPos];
@@ -44,13 +50,25 @@ public class CretureController : MonoBehaviour
                 return;
 
             if (closed[next.x, next.y])
-                return; // Á×À½
+            {
+                playerController.PlayerReTrans();
+                return;
+            }
+                
 
 
             if (!(next.TiieType == tileTiles) && tileTiles == Define.TileTiles.P_Tile)
             {
                 cells.Add(new Vector3Int(next.x, next.y));
                 closed[next.x, next.y] = true;
+                if (curDir == Vector3Int.zero)
+                    curDir = dir;
+            }
+
+            if(tileTiles == Define.TileTiles.E_Tile)
+            {
+                current.monster = null;
+                next.monster = gameObject;
             }
             isMoving = true;
         }
@@ -60,8 +78,12 @@ public class CretureController : MonoBehaviour
 
             if (Vector3.Distance(transform.position, new Vector3Int(next.x, next.y)) < 0.001f)
             {
-                if (next.TiieType == tileTiles && cells.Count > 0)
+                if (next.TiieType == tileTiles && cells.Count > 0 && tileTiles == Define.TileTiles.P_Tile)
+                {
+                    curDir = Vector3Int.zero;
                     ColorGird();
+                }
+                    
 
                 current = next;
                 if (!(current.TiieType == tileTiles))

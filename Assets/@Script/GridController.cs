@@ -10,6 +10,8 @@ public class Cell
     public int y;
     public GameObject obj;
 
+    public GameObject monster;
+
     private Define.TileTiles _tile;
     public Define.TileTiles TiieType
     {
