@@ -132,13 +132,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   grid: {fileID: 0}
+  playerController: {fileID: 0}
   isMoving: 0
-  speed: 2.5
+  speed: 2
   dir: {x: 0, y: 0, z: 0}
   cells: []
-  isTel: 0
+  curDir: {x: 0, y: 0, z: 0}
   moveTime: 2
-  telTime: 5
+  isTel: 0
+  telTime: 7
 --- !u!1 &8600180085272575150
 GameObject:
   m_ObjectHideFlags: 0

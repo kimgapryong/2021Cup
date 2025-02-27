@@ -41,7 +41,7 @@ public class MonsterController : CretureController
     }
     private void MoveMonster()
     {
-        if (!isMoving && dir != Vector3Int.zero)
+        if (!isMoving && dir != Vector3Int.zero )
         {
             Vector3Int nextPos = new Vector3Int(current.x, current.y) + dir;
             next = grid.cellDic[nextPos];
@@ -51,8 +51,15 @@ public class MonsterController : CretureController
 
             if (playerController.closed[next.x, next.y])
             {
-                playerController.PlayerReTrans();
+                playerController.PlayerReTrans(out dir);
+                transform.position = grid.grid.CellToWorld(new Vector3Int(current.x, current.y));
                 return;
+            }
+
+            if (tileTiles == Define.TileTiles.E_Tile)
+            {
+                current.monster = null;
+                next.monster = gameObject;
             }
 
             isMoving = true;

@@ -35,8 +35,15 @@ public class RageMonsterController : MonsterController
 
             if (playerController.closed[next.x, next.y])
             {
-                playerController.PlayerReTrans();
+                playerController.PlayerReTrans(out dir);
+                transform.position = grid.grid.CellToWorld(new Vector3Int(current.x, current.y));
                 return;
+            }
+
+            if (tileTiles == Define.TileTiles.E_Tile)
+            {
+                current.monster = null;
+                next.monster = gameObject;
             }
 
             isMoving = true;

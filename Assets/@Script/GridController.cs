@@ -12,6 +12,8 @@ public class Cell
 
     public GameObject monster;
 
+    private bool isfirst;
+
     private Define.TileTiles _tile;
     public Define.TileTiles TiieType
     {
@@ -21,6 +23,14 @@ public class Cell
         }
         set
         {
+            if (isfirst)
+            {
+                if (value == Define.TileTiles.P_Tile)
+                    GameManager.Instance.Score++;
+                else if (value == Define.TileTiles.E_Tile)
+                    GameManager.Instance.Score--;
+            }
+            isfirst = true;
             _tile = value;
         }
     }
@@ -61,6 +71,7 @@ public class GridController : MonoBehaviour
                 cell.obj.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1f, 0.5f);
                 cell.obj.transform.parent = tileRoot;
                 cell.TiieType = Define.TileTiles.E_Tile;
+
                 cell.x = x;
                 cell.y = y;
 

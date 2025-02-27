@@ -240,11 +240,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   grid: {fileID: 0}
+  playerController: {fileID: 0}
   isMoving: 0
-  speed: 0.5
+  speed: 0.7
   dir: {x: 0, y: 0, z: 0}
   cells: []
-  moveTime: 2
+  curDir: {x: 0, y: 0, z: 0}
+  moveTime: 6
+  isTel: 0
 --- !u!70 &4470984617592144741
 CapsuleCollider2D:
   m_ObjectHideFlags: 0

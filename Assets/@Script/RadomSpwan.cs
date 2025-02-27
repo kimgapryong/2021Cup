@@ -17,6 +17,7 @@ public class RadomSpwan : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Debug.Log("init new");
         gridController.Init();
 
         GameObject pla = Instantiate(player);

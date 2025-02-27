@@ -1,11 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : CretureController
 {
     private HashSet<Vector3Int> visited = new HashSet<Vector3Int>();
     public int playerHp = 5;
+    public Vector3Int currentMax;
+    public Vector3Int currentMin;
     public Dictionary<Vector3Int, Vector3Int> newVecInt = new Dictionary<Vector3Int, Vector3Int>()
     {
         {Vector3Int.up, Vector3Int.down},
@@ -23,7 +26,7 @@ public class PlayerController : CretureController
 
         speed = 10;
         Sprite = grid.p_Sprite;
-        Debug.Log(current.x +"/" +current.y);
+
      
     }
     protected override void Update()
@@ -51,10 +54,6 @@ public class PlayerController : CretureController
 
        Vector3Int nextVec = GetCenterVec();
 
-     
-        Debug.Log(nextVec.x + ", " + nextVec.y);
-        Debug.Log("--------------------------------");
-     
         if(nextVec != Vector3Int.zero && cells.Count > 2)
             FoolBfs(nextVec);
 
@@ -72,10 +71,13 @@ public class PlayerController : CretureController
 
     private void FoolBfs(Vector3Int vec)
     {
+     
         if (visited.Contains(vec)) return;  // 이미 방문한 셀이면 리턴
         visited.Add(vec); // 방문한 셀 저장
 
         if (!grid.cellDic.TryGetValue(vec, out Cell cell)) return;
+
+            
 
         if(cell.TiieType == Define.TileTiles.E_Tile)
         {
@@ -132,7 +134,8 @@ public class PlayerController : CretureController
 
        if (minX == maxX ||  minY == maxY)
             return Vector3Int.zero;
-
+        currentMax = new Vector3Int(maxX, maxY);
+        currentMin = new Vector3Int(minX, minY);
         Vector3Int centerPos = Search(new Vector3Int(minX, minY), new Vector3Int(maxX, maxY));
 
         return centerPos;    
@@ -211,9 +214,17 @@ public class PlayerController : CretureController
         return Vector3Int.zero;
     }
 
-    public void PlayerReTrans()
+    public void PlayerReTrans(out Vector3Int dir)
     {
+        if (GameManager.Instance.Life - 1 <= 0)
+        {
+            SceneManager.LoadScene("DeathScene");
+            dir = Vector3Int.zero;
+            return;
+        }
+        GameManager.Instance.Life--;
         isKey = true;
+
         dir = Vector3Int.zero;
         Time.timeScale = 0;
 
@@ -227,12 +238,12 @@ public class PlayerController : CretureController
 
     private IEnumerator RewindCells()
     {
-        float rewindSpeed = 15f; // 되감기 속도 조절
+        float rewindSpeed = 25f; // 되감기 속도 조절
 
         for (int i = cells.Count - 1; i >= 0; i--)
         {
             Vector3Int targetPos = cells[i]; // 셀의 월드 좌표 변환
-
+     
             while (Vector3.Distance(transform.position, targetPos) > 0.01f)
             {
                 transform.position = Vector3.MoveTowards(transform.position, targetPos, rewindSpeed * Time.unscaledDeltaTime);
@@ -256,8 +267,11 @@ public class PlayerController : CretureController
         next = null;
         Vector3Int curr = grid.grid.WorldToCell(transform.position);
         current = grid.cellDic[curr];
+
         curDir = Vector3Int.zero;
+        isMoving = false;
         isKey = false;
+
 
         Time.timeScale = 1;
     }

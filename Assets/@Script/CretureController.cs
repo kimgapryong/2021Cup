@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,6 +20,7 @@ public class CretureController : MonoBehaviour
     public List<Vector3Int> cells = new List<Vector3Int>();
     public Vector3Int curDir;
     public Sprite Sprite { get; set; }
+
     protected virtual void Start()
     {
         grid = GameObject.Find("@Grid").GetComponent<GridController>();
@@ -51,7 +53,9 @@ public class CretureController : MonoBehaviour
 
             if (closed[next.x, next.y])
             {
-                playerController.PlayerReTrans();
+
+                playerController.PlayerReTrans(out dir);
+                transform.position = grid.grid.CellToWorld(new Vector3Int(current.x, current.y));
                 return;
             }
                 
@@ -65,14 +69,10 @@ public class CretureController : MonoBehaviour
                     curDir = dir;
             }
 
-            if(tileTiles == Define.TileTiles.E_Tile)
-            {
-                current.monster = null;
-                next.monster = gameObject;
-            }
+          
             isMoving = true;
         }
-        else if(isMoving)
+        else if(isMoving && next != null)
         {
             transform.position = Vector3.MoveTowards(transform.position, new Vector3Int(next.x, next.y), speed * Time.deltaTime);
 
