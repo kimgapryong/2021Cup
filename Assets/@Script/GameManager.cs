@@ -43,22 +43,24 @@ public class GameManager : MonoBehaviour
             LifeAction?.Invoke(value);
         }
     }
-    
+
     private void Awake()
     {
-        Init();
+        //Init();
+        _instance = this;
         maxScore = (grid.xTile * grid.yTile * 80) / 100;
         Life = 5;
     }
 
     private void Init()
     {
+        Debug.Log("dkdkdk");
+
         if (_instance == null)
         {
             GameObject go = GameObject.Find("@Manager");
             if (go != null)
             {
-                DestroyImmediate(go);
                 go = new GameObject("@Manager");
                 go.AddComponent<GameManager>();
             }

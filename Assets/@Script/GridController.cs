@@ -40,7 +40,7 @@ public class GridController : MonoBehaviour
     public int xTile;
     public int yTile;
     public int wallCount;
-    private int wallLength = 10;
+
     private int wallweight = 10;
 
     public Transform tileRoot;
