@@ -8,14 +8,19 @@ public class UiManager : MonoBehaviour
 {
     public Text life;
     public Text score;
+    public Text def;
 
-    void Start()
+    public void Init()
     {
         GameManager.Instance.ScoreAction -= SetScore;
         GameManager.Instance.ScoreAction += SetScore;
 
         GameManager.Instance.LifeAction -= SetLife;
         GameManager.Instance.LifeAction += SetLife;
+
+
+        GameManager.Instance.DefAction -= SetDef;
+        GameManager.Instance.DefAction += SetDef;
     }
 
     private void SetScore(int max, int current)
@@ -30,5 +35,11 @@ public class UiManager : MonoBehaviour
     private void SetLife(int hp)
     {
         life.text = hp.ToString();
+    }
+
+    private void SetDef(int sh)
+    {
+        Debug.Log("dlaglksdka");
+        def.text = sh.ToString();
     }
 }

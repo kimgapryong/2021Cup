@@ -35,6 +35,19 @@ public class RageMonsterController : MonsterController
 
             if (playerController.closed[next.x, next.y])
             {
+                if (GameManager.Instance.Def > 0)
+                {
+
+                    GameManager.Instance.Def--;
+                    next.TiieType = tileTiles;
+                    next.obj.GetComponent<SpriteRenderer>().sprite = Sprite;
+                    next.obj.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.5f);
+                    playerController.canWrite = true;
+
+                    Destroy(gameObject);
+                    return;
+                }
+
                 playerController.PlayerReTrans(out dir);
                 transform.position = grid.grid.CellToWorld(new Vector3Int(current.x, current.y));
                 return;

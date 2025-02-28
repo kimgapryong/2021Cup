@@ -384,8 +384,22 @@ MonoBehaviour:
   - {fileID: 370561773995911582, guid: 7dcfc63acb589534d910151196d6515b, type: 3}
   - {fileID: 4060284347768357334, guid: 9233e46010fa4c84ea9563b222acab82, type: 3}
   - {fileID: 4680043266809992829, guid: 1d5b33828649f3147a1b1bc4c71ac8ad, type: 3}
+  items:
+  - {fileID: 970109372355373657, guid: 872854565716a1d44960fc920a1009c8, type: 3}
+  - {fileID: 1270274075956305340, guid: af8925b634996d94bb9f39814c9a341e, type: 3}
+  - {fileID: 7022585196612754042, guid: 41b7852f4ca78894fb4dceef10e46e79, type: 3}
+  - {fileID: 7171092055980971195, guid: 9f51b540f3c8c504cb5a6c734014ce3b, type: 3}
+  - {fileID: 402532094527446371, guid: a93f5fcb27e1cd645b92fc58274948ab, type: 3}
   spwanTime: 5
   monMaxCount: 10
+  ItemTime: 10
+  currentItem: 0
+  itemMaxCount: 14
+  lifeCount: 2
+  defenceCount: 3
+  godCount: 1
+  randomCount: 5
+  speedCount: 3
 --- !u!4 &235094047
 Transform:
   m_ObjectHideFlags: 0
@@ -650,7 +664,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 533484092}
-  - component: {fileID: 533484091}
+  - component: {fileID: 533484093}
   m_Layer: 0
   m_Name: '@Manager'
   m_TagString: Untagged
@@ -658,20 +672,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &533484091
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 533484090}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8133848685f5b2841bca89d608709dc1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  grid: {fileID: 131681273}
-  maxScore: 0
 --- !u!4 &533484092
 Transform:
   m_ObjectHideFlags: 0
@@ -687,6 +687,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &533484093
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 533484090}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e38cebf717bf784e90cb910b3ba49c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ui: {fileID: 654766128}
+  grid: {fileID: 131681273}
+  maxScore: 0
 --- !u!1 &654766127
 GameObject:
   m_ObjectHideFlags: 0
@@ -718,6 +733,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   life: {fileID: 143478834}
   score: {fileID: 239479779}
+  def: {fileID: 684524228}
 --- !u!4 &654766129
 Transform:
   m_ObjectHideFlags: 0
@@ -803,9 +819,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: '5
-
-'
+  m_Text: 0
 --- !u!222 &684524229
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1131,7 +1145,7 @@ GameObject:
   - component: {fileID: 1589229945}
   - component: {fileID: 1589229944}
   m_Layer: 5
-  m_Name: Life
+  m_Name: Defence
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1189,7 +1203,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\uD5C8\uC804"
+  m_Text: 'Def :'
 --- !u!222 &1589229945
 CanvasRenderer:
   m_ObjectHideFlags: 0

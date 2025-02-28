@@ -6,9 +6,25 @@ using UnityEngine.SceneManagement;
 public class PlayerController : CretureController
 {
     private HashSet<Vector3Int> visited = new HashSet<Vector3Int>();
+
     public int playerHp = 5;
     public Vector3Int currentMax;
     public Vector3Int currentMin;
+
+    public bool canWrite;
+
+    private bool _god;
+    public bool godTime
+    {
+        get { return _god; }
+        set
+        {
+            Debug.Log(value);
+            if (value)
+                StartCoroutine(GodTime());
+        }
+    }
+
     public Dictionary<Vector3Int, Vector3Int> newVecInt = new Dictionary<Vector3Int, Vector3Int>()
     {
         {Vector3Int.up, Vector3Int.down},
@@ -45,6 +61,7 @@ public class PlayerController : CretureController
         }
 
         base.Update();
+        QuestItem();
     }
 
   
@@ -53,6 +70,7 @@ public class PlayerController : CretureController
     {
 
        Vector3Int nextVec = GetCenterVec();
+        Debug.Log(nextVec.x + "," + nextVec.y);
 
         if(nextVec != Vector3Int.zero && cells.Count > 2)
             FoolBfs(nextVec);
@@ -65,8 +83,8 @@ public class PlayerController : CretureController
         }
 
         cells.Clear();
-        closed = null;
         closed = new bool[grid.xTile, grid.yTile];
+        canWrite = false;
     }
 
     private void FoolBfs(Vector3Int vec)
@@ -77,6 +95,8 @@ public class PlayerController : CretureController
 
         if (!grid.cellDic.TryGetValue(vec, out Cell cell)) return;
 
+        if ((cell.x >= currentMax.x || cell.y >= currentMax.y || cell.x <= currentMin.x || cell.y <= currentMin.y) && canWrite)
+            return;
             
 
         if(cell.TiieType == Define.TileTiles.E_Tile)
@@ -99,117 +119,124 @@ public class PlayerController : CretureController
         for (int i = 0; i < dirs.Length - 1; i++)
         {
             Vector3Int nextPos = vec + dirs[i];
-
+            Debug.Log(nextPos);
             if (grid.cellDic.TryGetValue(nextPos, out Cell nextCell))
             {
                 if (nextCell.TiieType != Define.TileTiles.P_Tile)
                     FoolBfs(nextPos);
-                continue;
             }
           
         }
     }
     private Vector3Int GetCenterVec()
+{
+    if (cells.Count == 0)
+        return Vector3Int.zero;
+
+    int maxX = cells[0].x, maxY = cells[0].y;
+    int minX = cells[0].x, minY = cells[0].y;
+
+    for (int i = 1; i < cells.Count; i++)
     {
-        int maxX = cells[0].x;
-        int maxY = cells[0].y;
-        int minX = cells[0].x;
-        int minY = cells[0].y;
-        for(int i = 1; i < cells.Count; i++)
-        {
-            if(maxX < Mathf.Abs(cells[i].x))
-                maxX = cells[i].x;
-
-            if(maxY < Mathf.Abs(cells[i].y))
-                maxY = cells[i].y;
-        }
-        for (int i = 1; i < cells.Count; i++)
-        {
-            if (minX > Mathf.Abs(cells[i].x))
-                minX = cells[i].x;
-
-            if (minY > Mathf.Abs(cells[i].y))
-                minY = cells[i].y;
-        }
-
-       if (minX == maxX ||  minY == maxY)
-            return Vector3Int.zero;
-        currentMax = new Vector3Int(maxX, maxY);
-        currentMin = new Vector3Int(minX, minY);
-        Vector3Int centerPos = Search(new Vector3Int(minX, minY), new Vector3Int(maxX, maxY));
-
-        return centerPos;    
+        maxX = Mathf.Max(maxX, cells[i].x);
+        maxY = Mathf.Max(maxY, cells[i].y);
+        minX = Mathf.Min(minX, cells[i].x);
+        minY = Mathf.Min(minY, cells[i].y);
     }
+
+    if (minX == maxX || minY == maxY)
+        return Vector3Int.zero;
+
+    currentMax = new Vector3Int(maxX, maxY);
+    currentMin = new Vector3Int(minX, minY);
+
+    return Search(new Vector3Int(minX, minY), new Vector3Int(maxX, maxY));
+}
 
     private Vector3Int Search(Vector3Int minVec, Vector3Int maxVec)
     {
         int count = 0;
-        Vector3Int current = new Vector3Int(maxVec.x - 1, maxVec.y - 1);
+        Vector3Int current;
 
-       
-
-        if(grid.cellDic.ContainsKey(current))
+   /*     if (grid.cellDic[new Vector3Int(maxVec.x - 1, maxVec.y - 1)].TiieType == Define.TileTiles.E_Tile ||
+            grid.cellDic[new Vector3Int(maxVec.x - 1, maxVec.y - 1)].TiieType == Define.TileTiles.Wall)
         {
-            if(grid.cellDic[current].TiieType == Define.TileTiles.E_Tile || grid.cellDic[current].TiieType == Define.TileTiles.Wall)
-            {
-                if (closed[current.x + Vector3Int.up.x, current.y + Vector3Int.up.y] &&
-                    closed[current.x + Vector3Int.right.x, current.y + Vector3Int.right.y]) 
-                    return current;
-                
-            }
-            else
-            {
-                current = new Vector3Int(minVec.x + 1, maxVec.y - 1);
-                if (closed[current.x + Vector3Int.up.x, current.y + Vector3Int.up.y] &&
-                    closed[current.x + Vector3Int.left.x, current.y + Vector3Int.left.y] &&
-                    grid.cellDic[current].TiieType == Define.TileTiles.E_Tile
-                     || grid.cellDic[current].TiieType == Define.TileTiles.Wall)
-                    return current;
-
-                current = new Vector3Int(minVec.x + 1, minVec.y + 1);
-                if (closed[current.x + Vector3Int.down.x, current.y + Vector3Int.down.y] &&
-                    closed[current.x + Vector3Int.left.x, current.y + Vector3Int.left.y] &&
-                    grid.cellDic[current].TiieType == Define.TileTiles.E_Tile
-                     || grid.cellDic[current].TiieType == Define.TileTiles.Wall)
-                    return current;
-
-                current = new Vector3Int(maxVec.x - 1, minVec.y + 1);
-                if (closed[current.x + Vector3Int.up.x, current.y + Vector3Int.up.y] &&
-                    closed[current.x + Vector3Int.right.x, current.y + Vector3Int.right.y] &&
-                    grid.cellDic[current].TiieType == Define.TileTiles.E_Tile
-                     || grid.cellDic[current].TiieType == Define.TileTiles.Wall)
-                    return current;
-            }
-
+            current = new Vector3Int(maxVec.x - 1, maxVec.y - 1);
+            if (closed[current.x + Vector3Int.up.x, current.y + Vector3Int.up.y] &&
+             closed[current.x + Vector3Int.right.x, current.y + Vector3Int.right.y])
+                return current;
         }
 
-        for(int x = maxVec.x; x >= minVec.x; x--)
+        if (grid.cellDic[new Vector3Int(minVec.x + 1, maxVec.y - 1)].TiieType == Define.TileTiles.E_Tile ||
+            grid.cellDic[new Vector3Int(minVec.x + 1, maxVec.y - 1)].TiieType == Define.TileTiles.Wall)
         {
-            for(int y = maxVec.y ; y >= minVec.y; y--)
-            {
-                if(grid.cellDic.ContainsKey(new Vector3Int(x, y)))
-                {
-                    if(grid.cellDic[new Vector3Int(x, y)].TiieType == Define.TileTiles.P_Tile)
-                    {
-                       count++;
-                        if(count >= 2)
-                        {
-                            if (grid.cellDic[new Vector3Int(x,y + 1)].TiieType == Define.TileTiles.E_Tile
-                                 || grid.cellDic[current].TiieType == Define.TileTiles.Wall)
-                                return new Vector3Int(x,y +1);
-                          
-                        }
-                        
-                    }
-                        
-                }
-            }
-            count = 0;
+            current = new Vector3Int(minVec.x + 1, maxVec.y - 1);
+            if (grid.cellDic[current].TiieType == Define.TileTiles.E_Tile
+                 || grid.cellDic[current].TiieType == Define.TileTiles.Wall)
+                return current;
         }
 
-        if (grid.cellDic[new Vector3Int(minVec.x + 1, minVec.y + 1)].TiieType == Define.TileTiles.E_Tile
-             || grid.cellDic[current].TiieType == Define.TileTiles.Wall)
-            return new Vector3Int(minVec.x + 1, minVec.y + 1);
+        if (grid.cellDic[new Vector3Int(minVec.x + 1, minVec.y + 1)].TiieType == Define.TileTiles.E_Tile ||
+            grid.cellDic[new Vector3Int(minVec.x + 1, minVec.y + 1)].TiieType == Define.TileTiles.Wall)
+        {
+            current = new Vector3Int(minVec.x + 1, minVec.y + 1);
+            if (grid.cellDic[current].TiieType == Define.TileTiles.E_Tile
+                 || grid.cellDic[current].TiieType == Define.TileTiles.Wall)
+                return current;
+        }
+
+        if (grid.cellDic[new Vector3Int(maxVec.x - 1, minVec.y + 1)].TiieType == Define.TileTiles.E_Tile ||
+            grid.cellDic[new Vector3Int(maxVec.x - 1, minVec.y + 1)].TiieType == Define.TileTiles.Wall)
+        {
+            current = new Vector3Int(maxVec.x - 1, minVec.y + 1);
+            if (grid.cellDic[current].TiieType == Define.TileTiles.E_Tile
+                 || grid.cellDic[current].TiieType == Define.TileTiles.Wall)
+                return current;
+        }*/
+
+        for(int i =0; i < cells.Count; i++)
+        {
+            int maxY = maxVec.y;
+          
+            if (cells[i].y < maxY)
+                continue;
+            Vector3Int curCell = cells[i];
+
+            if (grid.cellDic[curCell + Vector3Int.down].TiieType != Define.TileTiles.P_Tile)
+                return curCell + Vector3Int.down;
+        }
+        for (int i = 0; i < cells.Count; i++)
+        {
+            int minY = minVec.y;
+
+            if (cells[i].y > minY)
+                continue;
+
+            Vector3Int curCell = cells[i];
+            if (grid.cellDic[curCell + Vector3Int.up].TiieType != Define.TileTiles.P_Tile)
+                return curCell + Vector3Int.up;
+        }
+        for (int i = 0; i < cells.Count; i++)
+        {
+            int maxX = maxVec.x;
+
+            if (cells[i].x < maxX)
+                continue;
+            Vector3Int curCell = cells[i];
+            if (grid.cellDic[curCell + Vector3Int.left].TiieType != Define.TileTiles.P_Tile)
+                return curCell + Vector3Int.left;
+        }
+        for (int i = 0; i < cells.Count; i++)
+        {
+            int minX = minVec.x;
+
+            if (cells[i].x > minX)
+                continue;
+            Vector3Int curCell = cells[i];
+            if (grid.cellDic[curCell + Vector3Int.right].TiieType != Define.TileTiles.P_Tile)
+                return curCell + Vector3Int.right;
+        }
+
 
         return Vector3Int.zero;
     }
@@ -276,5 +303,24 @@ public class PlayerController : CretureController
         Time.timeScale = 1;
     }
 
+    private void QuestItem()
+    {
+        if (next == null)
+            return;
 
+        if(next.Item != null)
+            next.Item.GetComponent<ItemBase>().PlayerSetAbility();
+    }
+
+    private IEnumerator GodTime()
+    {
+        int cur = GameManager.Instance.Life;
+        GameManager.Instance.Life = 99;
+
+
+        yield return new WaitForSeconds(12f);
+
+        godTime = false;
+        GameManager.Instance.Life = cur;
+    }
 }

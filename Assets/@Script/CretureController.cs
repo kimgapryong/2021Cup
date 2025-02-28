@@ -27,6 +27,7 @@ public class CretureController : MonoBehaviour
         playerController = GameObject.Find("Player").GetComponent<PlayerController>();
 
         closed = new bool[grid.xTile, grid.yTile];
+
         Vector3Int currentPos = grid.grid.WorldToCell(transform.position);
         current = grid.cellDic[currentPos];
 
@@ -53,7 +54,7 @@ public class CretureController : MonoBehaviour
 
             if (closed[next.x, next.y])
             {
-
+               
                 playerController.PlayerReTrans(out dir);
                 transform.position = grid.grid.CellToWorld(new Vector3Int(current.x, current.y));
                 return;

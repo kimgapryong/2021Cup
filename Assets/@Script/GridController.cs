@@ -11,6 +11,7 @@ public class Cell
     public GameObject obj;
 
     public GameObject monster;
+    public GameObject Item;
 
     private bool isfirst;
 

@@ -10,11 +10,31 @@ public class RadomSpwan : MonoBehaviour
 
     public GameObject player;
     public GameObject[] monster;
+    public GameObject[] items;
 
-    public float spwanTime = 5;
+    public float spwanTime = 5f;
     private int currentCount = 0;
     public int monMaxCount = 10;
+
+
+    public float ItemTime = 0.1f;
+    public int currentItem = 0;
+    public int itemMaxCount = 14;
+ 
     // Start is called before the first frame update
+
+    #region 아이템 개수
+    public int lifeCount = 2;
+    
+    public int defenceCount = 3;
+    
+    public int godCount = 1;
+    
+    public int randomCount = 5;
+    
+    public int speedCount = 3;
+    
+    #endregion
     void Start()
     {
         Debug.Log("init new");
@@ -24,6 +44,7 @@ public class RadomSpwan : MonoBehaviour
         pla.transform.Find("Player").transform.position = new Vector2(2, 2);
 
         StartCoroutine(RandomSpwan());
+        StartCoroutine(ItemSpwan());
     }
 
     IEnumerator RandomSpwan()
@@ -60,8 +81,76 @@ public class RadomSpwan : MonoBehaviour
             GameObject sM = Instantiate(monster[rand]);
             sM.transform.position = pos;
         }
+    } // 몬스터 랜덤 생성
+
+    IEnumerator ItemSpwan()
+    {
+        while(currentItem <= itemMaxCount)
+        {
+            yield return new WaitForSeconds(ItemTime);
+
+            Vector3Int pos = GetItem();
+               
+            int rand = Random.Range(0, items.Length);
+
+            switch (rand)
+            {
+                case 0:
+                    if(lifeCount > 0)
+                    {
+                        lifeCount--;
+                        GameObject clone = Instantiate(items[rand]);
+                        clone.transform.position = pos;
+                        gridController.cellDic[pos].Item = clone;
+                        currentItem++;
+                    }
+                    break;
+                case 1:
+                    if (defenceCount > 0)
+                    {
+                        defenceCount--;
+                        GameObject clone = Instantiate(items[rand]);
+                        clone.transform.position = pos;
+                        gridController.cellDic[pos].Item = clone;
+                        currentItem++;
+                    }
+                    break;
+                case 2:
+                    if (godCount > 0)
+                    {
+                        godCount--;
+                        GameObject clone = Instantiate(items[rand]);
+                        clone.transform.position = pos;
+                        gridController.cellDic[pos].Item = clone;
+                        currentItem++;
+                    }
+                    break;
+                case 3:
+                    if (randomCount > 0)
+                    {
+                        randomCount--;
+                        GameObject clone = Instantiate(items[rand]);
+                        clone.transform.position = pos;
+                        gridController.cellDic[pos].Item = clone;
+                        currentItem++;
+                    }
+                    break;
+                case 4:
+                    if (speedCount > 0)
+                    {
+                        speedCount--;
+                        GameObject clone = Instantiate(items[rand]);
+                        clone.transform.position = pos;
+                        gridController.cellDic[pos].Item = clone;
+                        currentItem++;
+                    }
+                    break;
+            }
+            
+        }
     }
 
+    
     private Vector3Int GetVec()
     {
         Vector3Int pos = new Vector3Int(Random.Range(4, 48), Random.Range(4, 48));
@@ -75,5 +164,20 @@ public class RadomSpwan : MonoBehaviour
         }
 
         return new Vector3Int(5,5);
+    }
+
+    private Vector3Int GetItem()
+    {
+        Vector3Int pos = new Vector3Int(Random.Range(4, 48), Random.Range(4, 48));
+
+        if (gridController.cellDic.TryGetValue(pos, out Cell cell))
+        {
+            if (cell.TiieType == Define.TileTiles.Wall || cell.Item != null)
+                return GetItem();
+            else
+                return pos;
+        }
+
+        return new Vector3Int(5, 5);
     }
 }
