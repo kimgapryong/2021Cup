@@ -5,7 +5,7 @@ using UnityEngine;
 public class MonsterController : CretureController
 {
     public float moveTime = 2f;
-    Vector3Int[] randVec;
+    public Vector3Int[] randVec;
     public Coroutine coroutine;
     public bool isTel; //텔레포트 몬스터 전용
     protected override void Start()
@@ -29,7 +29,7 @@ public class MonsterController : CretureController
         MoveMonster();
     }
 
-    public IEnumerator RandomDir()
+    public virtual IEnumerator RandomDir()
     {
         while (true)
         {
@@ -44,6 +44,9 @@ public class MonsterController : CretureController
         if (!isMoving && dir != Vector3Int.zero )
         {
             Vector3Int nextPos = new Vector3Int(current.x, current.y) + dir;
+            if (!grid.cellDic.ContainsKey(nextPos))
+                return;
+
             next = grid.cellDic[nextPos];
 
             if (next.TiieType == Define.TileTiles.Wall)
@@ -90,7 +93,7 @@ public class MonsterController : CretureController
                 current = next;
                 if (!(current.TiieType == tileTiles))
                 {
-                    current.TiieType = tileTiles;
+                    current.TiieType = Define.TileTiles.Ee_Tile;
                     current.obj.GetComponent<SpriteRenderer>().sprite = Sprite;
                     current.obj.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.5f);
                 }

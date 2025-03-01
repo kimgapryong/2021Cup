@@ -71,16 +71,16 @@ public class RageMonsterController : MonsterController
                 current = next;
                 if (!(current.TiieType == tileTiles))
                 {
-                    current.TiieType = tileTiles;
+                    current.TiieType = Define.TileTiles.Ee_Tile;
                     current.obj.GetComponent<SpriteRenderer>().sprite = Sprite;
                     current.obj.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.5f);
                     for (int i = 0; i < moves.Length - 1; i++)
                     {
                         if (grid.cellDic.TryGetValue(new Vector3Int(current.x, current.y) + moves[i], out Cell cell))
                         {
-                            if(cell.TiieType != Define.TileTiles.Wall)
+                            if(cell.TiieType != Define.TileTiles.Wall && cell.TiieType != Define.TileTiles.E_Tile)
                             {
-                                cell.TiieType = tileTiles;  
+                                cell.TiieType = Define.TileTiles.Ee_Tile;  
                                 cell.obj.GetComponent<SpriteRenderer>().sprite = Sprite;
                                 cell.obj.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.5f);
                             }

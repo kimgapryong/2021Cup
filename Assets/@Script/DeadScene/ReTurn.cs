@@ -9,5 +9,19 @@ public class ReTurn : MonoBehaviour
     {
         SceneManager.LoadScene("Stage1");
     }
+
+    public void NextScene()
+    {
+        SceneManager.LoadScene("BossStage");
+    }
+
+    public void ReturnHome()
+    {
+        SceneManager.LoadScene("MyHomeZone");
+    }
+    public void GoStage1()
+    {
+        SceneManager.LoadScene("Stage1");
+    }
     
 }

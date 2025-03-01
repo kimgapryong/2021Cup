@@ -11,4 +11,16 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/DeathScene.unity
     guid: 7a065917bbec9544e8d861176405734a
+  - enabled: 1
+    path: Assets/Scenes/NiceClear.unity
+    guid: 95cdc7a3eb3d0344ca90da098ba22958
+  - enabled: 1
+    path: Assets/Scenes/MyHomeZone.unity
+    guid: f9e62535a7c0e784bb8c7d0b2f734d37
+  - enabled: 1
+    path: Assets/Scenes/ClearScene.unity
+    guid: ba9cbb65a050da64b9b8f33f1377a5b4
+  - enabled: 1
+    path: Assets/Scenes/BossStage.unity
+    guid: a534a17fbc92e2a4aaf83155621f317c
   m_configObjects: {}

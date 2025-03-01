@@ -147,6 +147,26 @@ public class GridController : MonoBehaviour
             }
         }
 
+        if(wallCount == 0)
+        {
+            for (int x = 0; x < xTile; x++)
+            {
+                for (int y = 0; y < yTile; y++)
+                {
+                    if (x <= 0 || y <= 0 || x >= xTile - 1 || y >= yTile - 1)
+                    {
+                        if (cellDic.ContainsKey(new Vector3Int(x, y)))
+                        {
+                            Cell cell = cellDic[new Vector3Int(x, y)];
+                            cell.obj.GetComponent<SpriteRenderer>().sprite = w_Sprite;
+                            cell.obj.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
+                            cell.TiieType = Define.TileTiles.Wall;
+                        }
+                    }
+                }
+            }
+        }
+
         
     }
 

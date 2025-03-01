@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -10,6 +11,7 @@ public class PlayerController : CretureController
     public int playerHp = 5;
     public Vector3Int currentMax;
     public Vector3Int currentMin;
+    public float rewindSpeed;
 
     public bool canWrite;
 
@@ -69,10 +71,9 @@ public class PlayerController : CretureController
     public override void ColorGird()
     {
 
-       Vector3Int nextVec = GetCenterVec();
-        Debug.Log(nextVec.x + "," + nextVec.y);
+        List<Vector3Int> nextVec = GetCenterVec();
 
-        if(nextVec != Vector3Int.zero && cells.Count > 2)
+        if(nextVec.Count >= 1 && cells.Count > 2)
             FoolBfs(nextVec);
 
 
@@ -83,116 +84,110 @@ public class PlayerController : CretureController
         }
 
         cells.Clear();
+        visited.Clear();
         closed = new bool[grid.xTile, grid.yTile];
         canWrite = false;
     }
 
-    private void FoolBfs(Vector3Int vec)
+    private void FoolBfs(List<Vector3Int> vec)
     {
-     
-        if (visited.Contains(vec)) return;  // 이미 방문한 셀이면 리턴
-        visited.Add(vec); // 방문한 셀 저장
-
-        if (!grid.cellDic.TryGetValue(vec, out Cell cell)) return;
-
-        if ((cell.x >= currentMax.x || cell.y >= currentMax.y || cell.x <= currentMin.x || cell.y <= currentMin.y) && canWrite)
-            return;
-            
-
-        if(cell.TiieType == Define.TileTiles.E_Tile)
-        {
-            cell.TiieType = Define.TileTiles.P_Tile;
-            cell.obj.GetComponent<SpriteRenderer>().sprite = grid.p_Sprite;
-            cell.obj.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
-        }
-        if(cell.monster != null)
-            Destroy(cell.monster);
-
         Vector3Int[] dirs = new Vector3Int[8]
         {
         new Vector3Int(1, 0), new Vector3Int(-1, 0),
         new Vector3Int(0, 1), new Vector3Int(0, -1),
-        new Vector3Int(1,1), new Vector3Int(-1,1),
-        new Vector3Int(1,-1), new Vector3Int(-1,-1)
+        new Vector3Int(1, 1), new Vector3Int(-1, 1),
+        new Vector3Int(1, -1), new Vector3Int(-1, -1)
         };
 
-        for (int i = 0; i < dirs.Length - 1; i++)
+        Queue<Vector3Int> queue = new Queue<Vector3Int>(vec);
+
+        while (queue.Count > 0)
         {
-            Vector3Int nextPos = vec + dirs[i];
-            Debug.Log(nextPos);
-            if (grid.cellDic.TryGetValue(nextPos, out Cell nextCell))
+            Vector3Int cur = queue.Dequeue();
+            Debug.Log(cur);
+            if (visited.Contains(cur))
+                continue; 
+
+            visited.Add(cur);
+
+            if (!grid.cellDic.TryGetValue(cur, out Cell cell))
+                continue;
+
+            if(cell.TiieType == Define.TileTiles.P_Tile)
+                continue;
+            if(cell.TiieType == Define.TileTiles.Ee_Tile)
             {
-                if (nextCell.TiieType != Define.TileTiles.P_Tile)
-                    FoolBfs(nextPos);
+                cell.TiieType = Define.TileTiles.P_Tile;
+                cell.obj.GetComponent<SpriteRenderer>().sprite = grid.p_Sprite;
+                cell.obj.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
+                continue;
             }
-          
+
+            if(cell.x <= 0 || cell.y <= 0 || cell.x > grid.xTile - 2 ||  cell.y > grid.yTile - 2)
+                continue;
+
+            if ((cell.x >= currentMax.x || cell.y >= currentMax.y ||
+                 cell.x <= currentMin.x || cell.y <= currentMin.y) && canWrite)
+                continue;
+
+            if (cell.TiieType == Define.TileTiles.E_Tile)
+            {
+                cell.TiieType = Define.TileTiles.P_Tile;
+                cell.obj.GetComponent<SpriteRenderer>().sprite = grid.p_Sprite;
+                cell.obj.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
+            }
+
+
+            if (cell.monster != null)
+            {
+                Destroy(cell.monster);
+                cell.monster = null;
+            }
+
+
+            foreach (Vector3Int dir in dirs)
+            {
+                Vector3Int nextPos = cur + dir;
+                if (grid.cellDic.TryGetValue(nextPos, out Cell nextCell))
+                {
+                    if (!visited.Contains(nextPos) && nextCell.TiieType != Define.TileTiles.P_Tile)
+                        queue.Enqueue(nextPos);
+                }
+            }
         }
     }
-    private Vector3Int GetCenterVec()
-{
-    if (cells.Count == 0)
-        return Vector3Int.zero;
 
-    int maxX = cells[0].x, maxY = cells[0].y;
-    int minX = cells[0].x, minY = cells[0].y;
-
-    for (int i = 1; i < cells.Count; i++)
+    private List<Vector3Int> GetCenterVec()
     {
-        maxX = Mathf.Max(maxX, cells[i].x);
-        maxY = Mathf.Max(maxY, cells[i].y);
-        minX = Mathf.Min(minX, cells[i].x);
-        minY = Mathf.Min(minY, cells[i].y);
-    }
+        List<Vector3Int> zero = new List<Vector3Int>();
 
-    if (minX == maxX || minY == maxY)
-        return Vector3Int.zero;
+        int maxX = cells[0].x, maxY = cells[0].y;
+        int minX = cells[0].x, minY = cells[0].y;
 
-    currentMax = new Vector3Int(maxX, maxY);
-    currentMin = new Vector3Int(minX, minY);
+        for (int i = 1; i < cells.Count; i++)
+        {
+            maxX = Mathf.Max(maxX, cells[i].x);
+            maxY = Mathf.Max(maxY, cells[i].y);
+            minX = Mathf.Min(minX, cells[i].x);
+            minY = Mathf.Min(minY, cells[i].y);
+        }
+
+        if (maxX == minX || maxY == minY)
+        {
+            zero.Add(Vector3Int.zero);
+            return zero;
+        }
+        currentMax = new Vector3Int(maxX, maxY);
+        currentMin = new Vector3Int(minX, minY);
 
     return Search(new Vector3Int(minX, minY), new Vector3Int(maxX, maxY));
 }
 
-    private Vector3Int Search(Vector3Int minVec, Vector3Int maxVec)
+    private List<Vector3Int> Search(Vector3Int minVec, Vector3Int maxVec)
     {
-        int count = 0;
-        Vector3Int current;
+        //int count = 0;
+        List<Vector3Int> current = new List<Vector3Int>();
 
-   /*     if (grid.cellDic[new Vector3Int(maxVec.x - 1, maxVec.y - 1)].TiieType == Define.TileTiles.E_Tile ||
-            grid.cellDic[new Vector3Int(maxVec.x - 1, maxVec.y - 1)].TiieType == Define.TileTiles.Wall)
-        {
-            current = new Vector3Int(maxVec.x - 1, maxVec.y - 1);
-            if (closed[current.x + Vector3Int.up.x, current.y + Vector3Int.up.y] &&
-             closed[current.x + Vector3Int.right.x, current.y + Vector3Int.right.y])
-                return current;
-        }
-
-        if (grid.cellDic[new Vector3Int(minVec.x + 1, maxVec.y - 1)].TiieType == Define.TileTiles.E_Tile ||
-            grid.cellDic[new Vector3Int(minVec.x + 1, maxVec.y - 1)].TiieType == Define.TileTiles.Wall)
-        {
-            current = new Vector3Int(minVec.x + 1, maxVec.y - 1);
-            if (grid.cellDic[current].TiieType == Define.TileTiles.E_Tile
-                 || grid.cellDic[current].TiieType == Define.TileTiles.Wall)
-                return current;
-        }
-
-        if (grid.cellDic[new Vector3Int(minVec.x + 1, minVec.y + 1)].TiieType == Define.TileTiles.E_Tile ||
-            grid.cellDic[new Vector3Int(minVec.x + 1, minVec.y + 1)].TiieType == Define.TileTiles.Wall)
-        {
-            current = new Vector3Int(minVec.x + 1, minVec.y + 1);
-            if (grid.cellDic[current].TiieType == Define.TileTiles.E_Tile
-                 || grid.cellDic[current].TiieType == Define.TileTiles.Wall)
-                return current;
-        }
-
-        if (grid.cellDic[new Vector3Int(maxVec.x - 1, minVec.y + 1)].TiieType == Define.TileTiles.E_Tile ||
-            grid.cellDic[new Vector3Int(maxVec.x - 1, minVec.y + 1)].TiieType == Define.TileTiles.Wall)
-        {
-            current = new Vector3Int(maxVec.x - 1, minVec.y + 1);
-            if (grid.cellDic[current].TiieType == Define.TileTiles.E_Tile
-                 || grid.cellDic[current].TiieType == Define.TileTiles.Wall)
-                return current;
-        }*/
 
         for(int i =0; i < cells.Count; i++)
         {
@@ -200,10 +195,15 @@ public class PlayerController : CretureController
           
             if (cells[i].y < maxY)
                 continue;
+            
             Vector3Int curCell = cells[i];
 
+
+            if (!CanColor(curCell, Vector3Int.down))
+                continue;
+
             if (grid.cellDic[curCell + Vector3Int.down].TiieType != Define.TileTiles.P_Tile)
-                return curCell + Vector3Int.down;
+                current.Add(curCell + Vector3Int.down);
         }
         for (int i = 0; i < cells.Count; i++)
         {
@@ -213,8 +213,12 @@ public class PlayerController : CretureController
                 continue;
 
             Vector3Int curCell = cells[i];
+
+            if (!CanColor(curCell, Vector3Int.up))
+                continue;
+
             if (grid.cellDic[curCell + Vector3Int.up].TiieType != Define.TileTiles.P_Tile)
-                return curCell + Vector3Int.up;
+                current.Add(curCell + Vector3Int.up);
         }
         for (int i = 0; i < cells.Count; i++)
         {
@@ -222,9 +226,14 @@ public class PlayerController : CretureController
 
             if (cells[i].x < maxX)
                 continue;
+
             Vector3Int curCell = cells[i];
+
+            if (!CanColor(curCell, Vector3Int.left))
+                continue;
+
             if (grid.cellDic[curCell + Vector3Int.left].TiieType != Define.TileTiles.P_Tile)
-                return curCell + Vector3Int.left;
+                current.Add(curCell + Vector3Int.left);
         }
         for (int i = 0; i < cells.Count; i++)
         {
@@ -232,15 +241,45 @@ public class PlayerController : CretureController
 
             if (cells[i].x > minX)
                 continue;
+
             Vector3Int curCell = cells[i];
+
+            if (!CanColor(curCell, Vector3Int.right))
+                continue;
+
             if (grid.cellDic[curCell + Vector3Int.right].TiieType != Define.TileTiles.P_Tile)
-                return curCell + Vector3Int.right;
+                current.Add(curCell + Vector3Int.right);
         }
 
+        if(current.Count <= 0)
+            current.Add(Vector3Int.zero);
 
-        return Vector3Int.zero;
+        return current;
     }
+    private bool CanColor(Vector3Int cur, Vector3Int dir)
+    {
+        int cun = 0;
 
+        if (dir == Vector3Int.up)
+            cun = currentMax.y;
+        else if (dir == Vector3Int.down)
+            cun = currentMax.y;
+        else if (dir == Vector3Int.left)
+            cun = currentMax.x;
+        else if (dir == Vector3Int.right)
+            cun = currentMax.x;
+
+        Vector3Int current = cur;
+        for (int i =0; i < cun ; i++)
+        {
+            current += dir;
+            if(grid.cellDic.ContainsKey(current))
+                if (grid.cellDic[current].TiieType == Define.TileTiles.P_Tile)
+                    return true;
+        }
+
+        return false;
+    }
     public void PlayerReTrans(out Vector3Int dir)
     {
         if (GameManager.Instance.Life - 1 <= 0)
@@ -265,7 +304,6 @@ public class PlayerController : CretureController
 
     private IEnumerator RewindCells()
     {
-        float rewindSpeed = 25f; // 되감기 속도 조절
 
         for (int i = cells.Count - 1; i >= 0; i--)
         {

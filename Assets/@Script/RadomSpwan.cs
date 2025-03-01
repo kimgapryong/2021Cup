@@ -1,12 +1,16 @@
+using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class RadomSpwan : MonoBehaviour
 {
+    public Define.Stage Stage;
     public GridController gridController;
     public GameObject monParticel;
     public GameObject boss;
+    public GameObject bossPrefab;
+    public CheatAngine cheat;
 
     public GameObject player;
     public GameObject[] monster;
@@ -20,6 +24,8 @@ public class RadomSpwan : MonoBehaviour
     public float ItemTime = 0.1f;
     public int currentItem = 0;
     public int itemMaxCount = 14;
+
+    public float PlayerSpeed;
  
     // Start is called before the first frame update
 
@@ -42,6 +48,18 @@ public class RadomSpwan : MonoBehaviour
 
         GameObject pla = Instantiate(player);
         pla.transform.Find("Player").transform.position = new Vector2(2, 2);
+        pla.transform.Find("Player").GetComponent<PlayerController>().rewindSpeed = PlayerSpeed;
+
+        cheat.Init(pla.transform.Find("Player").GetComponent<PlayerController>());
+
+        Stage = Define.Stage.Normal;
+        if(bossPrefab != null)
+        {
+            GameObject bossMonster = Instantiate(bossPrefab);
+            bossMonster.transform.position = new Vector3Int(24, 24);
+            pla.transform.Find("Virtual Camera").GetComponent<CinemachineVirtualCamera>().m_Lens.OrthographicSize = 16;
+            Stage = Define.Stage.Boss;
+        }
 
         StartCoroutine(RandomSpwan());
         StartCoroutine(ItemSpwan());
@@ -51,6 +69,9 @@ public class RadomSpwan : MonoBehaviour
     {
         while (currentCount <= monMaxCount)
         {
+            if (monster.Length <= 0)
+                yield break;
+
             yield return new WaitForSeconds(spwanTime);
 
             Vector3Int pos = GetVec();

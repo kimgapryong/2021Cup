@@ -69,7 +69,6 @@ public class GameManager : MonoBehaviour
         maxScore = (grid.xTile * grid.yTile * 80) / 100;
         ui.Init();
         Life = 5;
-        Def = 5;
     }
 
     private void Init()
