@@ -70,6 +70,8 @@ public class PlayerController : CretureController
 
     public override void ColorGird()
     {
+        if (grid.cellDic[new Vector3Int(next.x, next.y) + dir].TiieType != Define.TileTiles.P_Tile)
+            return;
 
         List<Vector3Int> nextVec = GetCenterVec();
 
@@ -284,22 +286,25 @@ public class PlayerController : CretureController
     {
         if (GameManager.Instance.Life - 1 <= 0)
         {
+            StopAllCoroutines(); 
+            Time.timeScale = 1;  
             SceneManager.LoadScene("DeathScene");
             dir = Vector3Int.zero;
             return;
         }
+
         GameManager.Instance.Life--;
         isKey = true;
 
         dir = Vector3Int.zero;
-        Time.timeScale = 0;
+      
 
         if (cells.Count > 0)
         {
             StartCoroutine(RewindCells());
         }
 
-        
+        Time.timeScale = 0;
     }
 
     private IEnumerator RewindCells()

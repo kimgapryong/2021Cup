@@ -8,6 +8,9 @@ public class GameManager : MonoBehaviour
     private static GameManager _instance;
     public static GameManager Instance { get { return _instance; } }
 
+    private RankingManager _rankingManager = new RankingManager();
+    public static RankingManager Rank { get { return _instance._rankingManager; } }
+
     public UiManager ui;
 
     public Action<int, int> ScoreAction;
@@ -62,14 +65,31 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private float gameTime;
+    public float GameTime
+    {
+        get
+        {
+            return gameTime;
+        }
+        set
+        {
+            gameTime = Mathf.Floor(value * 10) / 10; 
+        }
+    }
+
+
     private void Awake()
     {
         //Init();
         _instance = this;
-        maxScore = (grid.xTile * grid.yTile * 80) / 100;
-        ui.Init();
+        if(grid != null) 
+            maxScore = (grid.xTile * grid.yTile * 80) / 100;
+        if(ui != null)
+            ui.Init();
         Life = 5;
     }
+
 
     private void Init()
     {

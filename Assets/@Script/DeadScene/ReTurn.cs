@@ -23,5 +23,10 @@ public class ReTurn : MonoBehaviour
     {
         SceneManager.LoadScene("Stage1");
     }
+
+    public void GoRank()
+    {
+        SceneManager.LoadScene("RankingScene");
+    }
     
 }

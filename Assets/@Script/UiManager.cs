@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 public class UiManager : MonoBehaviour
 {
+
     public GameObject pop;
 
     public RadomSpwan rand;
@@ -15,7 +16,7 @@ public class UiManager : MonoBehaviour
     public Text def;
     public Text time;
 
-
+    bool isSceneLoading = false;
     public void Init()
     {
         GameManager.Instance.ScoreAction -= SetScore;
@@ -34,12 +35,17 @@ public class UiManager : MonoBehaviour
      
          float socrs = (float)current / max * 100;
         socrs = Mathf.Floor(socrs * 10) / 10;
-        if(socrs >= 80)
+        if(socrs >= 80 && !isSceneLoading)
         {
+            isSceneLoading = true; 
             if (rand.Stage == Define.Stage.Normal)
                 SceneManager.LoadScene("ClearScene");
-            else
+            else if (rand.Stage == Define.Stage.Boss)
+            {
+                GameManager.Rank.SaveData(GameManager.Instance.GameTime);
                 SceneManager.LoadScene("NiceClear");
+            }
+                
         }
         else if (score != null)
             score.text = $"{socrs}%";
@@ -75,6 +81,7 @@ public class UiManager : MonoBehaviour
         if (time != null)
         {
             gameTime += Time.unscaledDeltaTime;
+            GameManager.Instance.GameTime = gameTime;
             time.text = gameTime.ToString();
         }
             

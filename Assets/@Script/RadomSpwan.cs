@@ -193,7 +193,7 @@ public class RadomSpwan : MonoBehaviour
 
         if (gridController.cellDic.TryGetValue(pos, out Cell cell))
         {
-            if (cell.TiieType == Define.TileTiles.Wall || cell.Item != null)
+            if (cell.TiieType == Define.TileTiles.Wall || cell.Item != null || cell.TiieType != Define.TileTiles.P_Tile)
                 return GetItem();
             else
                 return pos;

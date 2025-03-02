@@ -6,6 +6,7 @@ public class GodItem : ItemBase
 {
     public override void PlayerSetAbility()
     {
+        GetItme();
         if (player.godTime)
             return;
         

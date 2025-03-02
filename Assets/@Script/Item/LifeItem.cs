@@ -6,7 +6,8 @@ public class LifeItem : ItemBase
 {
     public override void PlayerSetAbility()
     {
-        if(GameManager.Instance.Life < 5)
+        GetItme();
+        if (GameManager.Instance.Life < 5)
         {
             GameManager.Instance.Life++;
         }
